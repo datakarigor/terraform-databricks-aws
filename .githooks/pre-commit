@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Local Git hook wrapper: run terraform fmt and validate before commit
+ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || echo ".")
+cd "$ROOT_DIR"
+
+# If there are staged .tf files, run fmt only on their directories; otherwise run full recursive fmt
+STAGED_TFS=$(git diff --cached --name-only --diff-filter=ACMRTUXB | grep -E '\.tf$' || true)
+if [ -n "$STAGED_TFS" ]; then
+  echo "Formatting staged Terraform files..."
+  echo "$STAGED_TFS" | xargs -r -n1 dirname | sort -u | xargs -r terraform fmt
+  # add any changes from formatting back to index
+  echo "$STAGED_TFS" | xargs -r -n1 dirname | sort -u | xargs -r git add
+else
+  echo "No staged .tf files detected — running full terraform fmt --recursive"
+  terraform fmt --recursive
+  git add -A
+fi
+
+echo "Running terraform validate..."
+if ! terraform validate >/dev/null 2>&1; then
+  echo "terraform validate failed. Run 'terraform validate' locally to see details." >&2
+  exit 1
+fi
+
+echo "Terraform fmt and validate passed."
+exit 0
