@@ -31,30 +31,7 @@ Safety & cost notes
 - Network and PrivateLink work (Exercise 3) often creates NAT Gateways and interface endpoints that bill while present — destroy promptly when done.
 - Changing network-related attributes on an existing Databricks workspace may require replacement (workspace destroy/create) — read plan output carefully before applying.
 
-Exercise 1 — Simple workspace (default VPC)
-Objective
-- Stand up a minimal Databricks workspace using Databricks MWS resources and S3-backed root storage.
 
-Concrete implementation steps (add to `terraform/main.tf`)
-- Resource: `aws_s3_bucket dbfs_root` — root storage for DBFS. Optionally allow user-provided name via `var.s3_root_bucket_name`, else auto-create with a random suffix.
-- Resource: `aws_iam_role databricks_cross_account` — role Databricks will assume. `assume_role_policy` should allow the Databricks service principal (see Databricks docs for exact principal or account-specific principal).
-- Resource: `aws_iam_role_policy databricks_basic` — minimal inline policy granting S3 access to the root bucket and any additional required actions.
-- Resource: `databricks_mws_credentials` — link role ARN to Databricks account.
-- Resource: `databricks_mws_storage_configurations` — point to S3 root and the credentials resource.
-- Resource: `databricks_mws_workspaces` — create a workspace referencing the storage config & credentials. Use `region = var.region`.
-
-Important tips while coding
-- Keep secrets out of Terraform state where possible; use Databricks managed secrets or AWS Secrets Manager for longer-lived secrets.
-- Mark sensitive outputs with `sensitive = true`.
-
-Verification
-- `terraform plan` should show `+` creates for bucket, role, credentials, storage config, workspace.
-- After `apply`, verify:
-  - Databricks Account Console → Workspaces contains your workspace.
-  - S3 bucket exists: `aws s3api get-bucket-location --bucket <name>`
-
-Suggested commit message
-- "Exercise 1: simple Databricks workspace + S3 root storage"
 
 Exercise 2 — Secure storage (KMS + least-privilege IAM)
 Objective

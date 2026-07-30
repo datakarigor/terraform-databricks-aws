@@ -1,3 +1,8 @@
 # Ignore terraform artifacts
 *.terraform
+*.tfstate
+*.tfstate.backup
+.envrc
+.tfvars
+.tfvars.json
 *.terraform.*
