@@ -1,13 +1,15 @@
 variable "region" {
   description = "The AWS region to deploy resources in"
   type        = string
-  default     = "eu-north-1"
+  default     = "eu-west-1"
 }
 
-variable "databricks_aws_region" {
-  description = "The AWS region where the Databricks workspace will be created"
-  type        = string
-  default     = "ap-northeast-1"
+variable "tags" {
+  description = "A map of tags to assign to resources"
+  type        = map(string)
+  default = {
+    "Project" = "Databricks AWS Terraform"
+  }
 }
 
 variable "prefix" {
@@ -37,10 +39,8 @@ variable "databricks_account_id" {
   type        = string
 }
 
-variable "tags" {
-  description = "A map of tags to assign to resources"
-  type        = map(string)
-  default = {
-    "Project" = "Databricks AWS Terraform"
-  }
+variable "cidr_block" {
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.4.0.0/16"
 }
